@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba WebSocket</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+
+<body>
+    <h1>Prueba de WebSocket</h1>
+    <button onclick="enviarEvento()">Enviar Evento</button>
+
+    <script>
+        const socket = io("http://localhost:3000", {
+            transports: ["websocket", "polling"],
+        });
+        socket.on("connect", () => {
+            console.log("🔗 Conectado al servidor WebSocket");
+        });
+
+        socket.on("call_update", (data) => {
+            console.log("Evento recibido:", data);
+        });
+
+        function enviarEvento() {
+            const evento = { call_id: "123", type: "call_initiated" };
+            socket.emit("event", evento);
+            console.log("Evento enviado:", evento);
+        }
+    </script>
+</body>
+
+</html>
