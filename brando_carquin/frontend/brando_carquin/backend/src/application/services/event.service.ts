@@ -17,7 +17,7 @@ export class EventsService {
     @Inject("CallRepository") private readonly callRepository: CallRepository,
     @Inject("CallEventRepository")
     private readonly callEventRepository: CallEventRepository,
-  ) { }
+  ) {}
 
   private readonly validEvents = [
     "call_initiated",
@@ -114,45 +114,8 @@ export class EventsService {
     return true;
   }
 
-  async eventHistory(status?: string, callId?: string) {
-    const eventHistory = await this.callEventRepository.findAll(status, callId);
-    console.log("Fetched event history:", eventHistory);
-
-    if (!eventHistory || eventHistory.length === 0) {
-      console.log("No events found.");
-    }
-
-    const uniqueCallIds = new Set(eventHistory.map((event) => event.callId));
-    console.log("Unique call IDs:", uniqueCallIds);
-
-    const callIdsWithInitiatedType = new Set<string>();
-    eventHistory.forEach((event) => {
-      if (event.type === "initiated") {
-        callIdsWithInitiatedType.add(event.callId);
-      }
-    });
-
-    console.log("Call IDs with initiated type:", callIdsWithInitiatedType);
-
-    const generateCalls = this.generateDynamicCalls()
-    console.log("generateCalls:", generateCalls);
-
-    const totalCall = uniqueCallIds.size + generateCalls.totalCalls;
-    const callInProgress = Math.round(callIdsWithInitiatedType.size + (generateCalls.totalCalls * 0.2));
-    const second = generateCalls.averageSeconds + 's';
-    const randomPorcentaje = Math.floor(Math.random() * (100 - 10 + 1)) + 10;
-    const compliance = randomPorcentaje + '%'
-
-    return {
-      values: generateCalls.callRecords,
-      key: generateCalls.hours,
-      totalCalls: totalCall,
-      callInProgress,
-      second,
-      seconds: generateCalls.seconds,
-      compliance,
-      eventHistory
-    }
+  async eventHistory(status?: string, callId?: string): Promise<CallEvent[]> {
+    return await this.callEventRepository.findAll(status, callId);
   }
 
   private startSLATimer(call_id: string) {
@@ -180,49 +143,5 @@ export class EventsService {
         this.server.emit("hold_exceeded", { call_id });
       }
     }, 60000);
-  }
-
-  private generateDynamicCalls() {
-    const currentHour = new Date().getHours();
-    console.log("Current Hour:", currentHour);
-
-    const callCounts = [3, 20, 50, 80];
-
-    const callRecords = [];
-    const hours = [];
-    const seconds = [];
-
-    let totalCalls = 0;
-    if (currentHour < 1) {
-      console.log("Error: currentHour is less than 1. No calls will be generated.");
-      return { hours: [], callRecords: [], totalCalls: 0 };
-    }
-
-    for (let i = 1; i <= currentHour; i++) {
-      if (i % 2 === 0) {
-        const randomCallCount = callCounts[Math.floor(Math.random() * callCounts.length)];
-        callRecords.push(randomCallCount);
-  
-        const hourLabel = `${i === 12 ? 12 : i % 12} ${i < 12 ? 'AM' : 'PM'}`;
-        hours.push(hourLabel);
-  
-        totalCalls += randomCallCount;
-
-        const randomSeconds = Math.floor(Math.random() * (60 - 10 + 1)) + 10;
-        seconds.push(randomSeconds);
-        console.log(`Hour: ${hourLabel}, Calls: ${randomCallCount},  Second: ${randomSeconds},`);
-      }
-    }
-  
-    const totalSeconds = seconds.reduce((acc, curr) => acc + curr, 0);
-    const averageSeconds = seconds.length > 0 ? Math.floor(totalSeconds / seconds.length) : 0;
-
-    return {
-      hours,
-      callRecords,
-      seconds,
-      totalCalls,
-      averageSeconds
-    };
   }
 }

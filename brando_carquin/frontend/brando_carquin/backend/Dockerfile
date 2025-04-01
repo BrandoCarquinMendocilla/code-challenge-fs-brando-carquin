@@ -1,9 +1,5 @@
 FROM node:20
 
-ENV TZ=America/Lima
-
-RUN apt-get update && apt-get install -y tzdata
-
 WORKDIR /app
 COPY package*.json ./
 

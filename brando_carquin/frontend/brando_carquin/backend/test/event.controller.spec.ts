@@ -118,14 +118,14 @@ describe('EventsService', () => {
             jest.spyOn(callEventRepository, "findAll").mockResolvedValue(mockCalls);
 
             const history = await service.eventHistory();
-            expect(history.eventHistory.length).toBe(2);
+            expect(history.length).toBe(2);
         });
 
         it('should return filtered events based on status', async () => {
             jest.spyOn(callEventRepository, "findAll").mockResolvedValue([mockCalls[0]]);
 
             const history = await service.eventHistory('call_initiated');
-            expect(history.eventHistory.length).toBe(1);
+            expect(history.length).toBe(1);
         });
     });
 });
